@@ -214,7 +214,8 @@ function createGrass() {
   const bladeMat = new THREE.MeshStandardMaterial({ color: '#5abf6d', side: THREE.DoubleSide });
   const inst = new THREE.InstancedMesh(bladeGeo, bladeMat, 1800);
   const dummy = new THREE.Object3D();
-  for (let i = 0; i < inst.count; i++) {
+  let j = 0;
+  while (j < inst.count) {
     const x = randomInRange(-params.worldSize, params.worldSize);
     const z = randomInRange(-params.worldSize, params.worldSize);
     if (Math.hypot(x - 40, z + 20) < 60) continue;
@@ -223,7 +224,8 @@ function createGrass() {
     dummy.rotation.y = Math.random() * Math.PI;
     dummy.scale.setScalar(randomInRange(0.6, 1.4));
     dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
+    inst.setMatrixAt(j, dummy.matrix);
+    j++;
   }
   inst.instanceMatrix.needsUpdate = true;
   inst.castShadow = false;
