@@ -311,6 +311,7 @@ function applyBoidRules() {
   const alignVec = new THREE.Vector3();
   const cohesionVec = new THREE.Vector3();
   const separationVec = new THREE.Vector3();
+  const separationOffset = new THREE.Vector3();
 
   for (let i = 0; i < boids.length; i++) {
     const boid = boids[i];
@@ -329,7 +330,9 @@ function applyBoidRules() {
         neighborCount++;
       }
       if (distance < params.separationRadius) {
-        separationVec.subVectors(boid.position, other.position).divideScalar(Math.max(distance, 0.001));
+        const denom = Math.max(distance, 0.001);
+        separationOffset.copy(boid.position).sub(other.position).divideScalar(denom);
+        separationVec.add(separationOffset);
       }
     }
 
