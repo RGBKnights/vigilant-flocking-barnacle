@@ -256,6 +256,27 @@ function createBirdGeometry() {
 
 function initBirds() {
   boids.length = 0;
+  if (birdMesh) {
+    scene.remove(birdMesh);
+    if (birdMesh.instanceColor) {
+      if (typeof birdMesh.instanceColor.dispose === 'function') {
+        birdMesh.instanceColor.dispose();
+      }
+      birdMesh.instanceColor.array = null;
+      birdMesh.instanceColor = null;
+    }
+    birdMesh.dispose();
+    if (birdMesh.geometry) birdMesh.geometry.dispose();
+    if (birdMesh.material) {
+      if (Array.isArray(birdMesh.material)) {
+        birdMesh.material.forEach((mat) => mat?.dispose());
+      } else {
+        birdMesh.material.dispose();
+      }
+    }
+    birdMesh = null;
+  }
+
   const geo = createBirdGeometry();
   const colors = new THREE.Color();
   const material = new THREE.MeshStandardMaterial({
@@ -264,9 +285,6 @@ function initBirds() {
     roughness: 0.45,
     flatShading: true,
   });
-  if (birdMesh) {
-    scene.remove(birdMesh);
-  }
   birdMesh = new THREE.InstancedMesh(geo, material, params.birdCount);
   birdMesh.castShadow = true;
   birdMesh.receiveShadow = false;
