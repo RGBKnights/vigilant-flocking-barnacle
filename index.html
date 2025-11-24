@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serene Bird Flocking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/src/assets/feather.svg" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="ui">
+        <h1>Serene Flocking</h1>
+        <p class="subtitle">Explore the meadow and fly with the flock.</p>
+        <div class="legend">
+          <div><strong>Space</strong>: Pause/Play</div>
+          <div><strong>B</strong>: Toggle bird view</div>
+          <div><strong>O</strong>: Orbit view</div>
+        </div>
+        <div class="status">
+          <span id="bird-count"></span>
+          <span id="mode"></span>
+        </div>
+      </div>
+      <div id="canvas-container"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
