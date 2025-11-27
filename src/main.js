@@ -44,6 +44,9 @@ document.body.appendChild(stats.dom);
 
 const clock = new THREE.Clock();
 
+const bounds = new THREE.Box3();
+let boundsHelper;
+
 const params = {
   birdCount: 120,
   maxSpeed: 38,
@@ -135,6 +138,19 @@ function createTerrain() {
   groundMesh.rotation.x = -Math.PI / 2;
   groundMesh.receiveShadow = true;
   scene.add(groundMesh);
+}
+
+function createBounds() {
+  const half = params.worldSize;
+  const maxHeight = params.worldSize * 0.6;
+  bounds.set(
+    new THREE.Vector3(-half, 8, -half),
+    new THREE.Vector3(half, maxHeight, half)
+  );
+
+  if (boundsHelper) scene.remove(boundsHelper);
+  boundsHelper = new THREE.Box3Helper(bounds, new THREE.Color('#58c7ff'));
+  scene.add(boundsHelper);
 }
 
 function createWater() {
@@ -312,6 +328,7 @@ function applyBoidRules() {
   const cohesionVec = new THREE.Vector3();
   const separationVec = new THREE.Vector3();
   const separationOffset = new THREE.Vector3();
+  const boundaryForce = new THREE.Vector3();
 
   for (let i = 0; i < boids.length; i++) {
     const boid = boids[i];
@@ -354,12 +371,23 @@ function applyBoidRules() {
       Math.cos(clock.elapsedTime * 0.12 + boid.position.x * 0.01) * params.windStrength
     );
 
+    const margin = 18;
+    const boundStrength = 0.08;
+    boundaryForce.set(0, 0, 0);
+    ['x', 'y', 'z'].forEach((axis) => {
+      const min = bounds.min[axis] + margin;
+      const max = bounds.max[axis] - margin;
+      if (boid.position[axis] < min) boundaryForce[axis] += (min - boid.position[axis]) * boundStrength;
+      if (boid.position[axis] > max) boundaryForce[axis] -= (boid.position[axis] - max) * boundStrength;
+    });
+
     boid.acceleration.set(0, 0, 0);
     boid.acceleration.add(alignVec);
     boid.acceleration.add(cohesionVec);
     boid.acceleration.add(separationVec);
     boid.acceleration.add(avoidVec);
     boid.acceleration.add(wind.multiplyScalar(0.02));
+    boid.acceleration.add(boundaryForce);
   }
 }
 
@@ -375,13 +403,10 @@ function updateBoids(delta) {
 
     boid.position.add(boid.velocity.clone().multiplyScalar(delta));
 
-    // bounds wrapping
-    ['x', 'y', 'z'].forEach((axis) => {
-      const half = params.worldSize * (axis === 'y' ? 0.6 : 1);
-      if (boid.position[axis] > half) boid.position[axis] = -half;
-      if (boid.position[axis] < -half) boid.position[axis] = half;
-    });
-    boid.position.y = Math.max(10, boid.position.y);
+    boid.position.x = THREE.MathUtils.clamp(boid.position.x, bounds.min.x, bounds.max.x);
+    const groundClearance = groundHeightAt(boid.position.x, boid.position.z) + 4;
+    boid.position.y = Math.max(groundClearance, Math.min(boid.position.y, bounds.max.y));
+    boid.position.z = THREE.MathUtils.clamp(boid.position.z, bounds.min.z, bounds.max.z);
 
     dummy.position.copy(boid.position);
     const forward = boid.velocity.clone().normalize();
@@ -449,6 +474,7 @@ window.addEventListener('keydown', (e) => {
 createSky();
 createSunlight();
 createTerrain();
+createBounds();
 const water = createWater();
 createRocks();
 createGrass();
