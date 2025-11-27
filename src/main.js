@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import GUI from 'lil-gui';
-import Stats from 'stats.js';
 
 const canvasContainer = document.getElementById('canvas-container');
 const statusBirdCount = document.getElementById('bird-count');
@@ -33,14 +32,6 @@ const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.enableDamping = true;
 orbit.minDistance = 20;
 orbit.maxDistance = 400;
-
-const stats = new Stats();
-stats.showPanel(0);
-stats.dom.style.position = 'fixed';
-stats.dom.style.right = '12px';
-stats.dom.style.top = '12px';
-stats.dom.style.zIndex = '12';
-document.body.appendChild(stats.dom);
 
 const clock = new THREE.Clock();
 
@@ -498,7 +489,6 @@ statusMode.textContent = 'Orbit view';
 
 let rippleTime = 0;
 function animate() {
-  stats.begin();
   const delta = Math.min(0.05, clock.getDelta());
   if (!state.paused) {
     updateBoids(delta);
@@ -511,7 +501,6 @@ function animate() {
   }
   orbit.update();
   renderer.render(scene, activeCamera);
-  stats.end();
   requestAnimationFrame(animate);
 }
 
