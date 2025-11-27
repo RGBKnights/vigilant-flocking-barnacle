@@ -371,15 +371,26 @@ function applyBoidRules() {
       Math.cos(clock.elapsedTime * 0.12 + boid.position.x * 0.01) * params.windStrength
     );
 
-    const margin = 18;
-    const boundStrength = 0.08;
+    const margin = 28;
+    const boundStrength = 0.18;
+    const centerPullStrength = 0.0025;
     boundaryForce.set(0, 0, 0);
     ['x', 'y', 'z'].forEach((axis) => {
       const min = bounds.min[axis] + margin;
       const max = bounds.max[axis] - margin;
-      if (boid.position[axis] < min) boundaryForce[axis] += (min - boid.position[axis]) * boundStrength;
-      if (boid.position[axis] > max) boundaryForce[axis] -= (boid.position[axis] - max) * boundStrength;
+      if (boid.position[axis] < min) {
+        const dist = min - boid.position[axis];
+        const ramp = Math.pow(Math.min(dist / margin, 1), 2);
+        boundaryForce[axis] += dist * boundStrength * ramp;
+      }
+      if (boid.position[axis] > max) {
+        const dist = boid.position[axis] - max;
+        const ramp = Math.pow(Math.min(dist / margin, 1), 2);
+        boundaryForce[axis] -= dist * boundStrength * ramp;
+      }
     });
+
+    const centerForce = boid.position.clone().multiplyScalar(-centerPullStrength);
 
     boid.acceleration.set(0, 0, 0);
     boid.acceleration.add(alignVec);
@@ -388,6 +399,7 @@ function applyBoidRules() {
     boid.acceleration.add(avoidVec);
     boid.acceleration.add(wind.multiplyScalar(0.02));
     boid.acceleration.add(boundaryForce);
+    boid.acceleration.add(centerForce);
   }
 }
 
